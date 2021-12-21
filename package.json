@@ -12,6 +12,7 @@
         "web-vitals": "^2.1.2",
         "axios": "^0.24.0"
     },
+    "proxy": "http://172.104.34.197",
     "scripts": {
         "start": "react-scripts start",
         "build": "react-scripts build",
