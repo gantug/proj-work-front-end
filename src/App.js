@@ -1,129 +1,101 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import "./App.css";
 
-
+let timer;
 
 function App() {
-    const [isChecked, setisChecked] = useState(false);
+	const WAIT_TIME = 500;
 
-    const apiRequest = async (value) => {
-        const resposne = await fetch("http://localhost:8000/", {
-            method: "POST",
-            body: JSON.stringify({
-                value,
-            }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-        return resposne.json();
-    };
+	const apiRequest = async (value) => {
+		const response = await fetch("http://localhost:8000/", {
+			method: "POST",
+			body: JSON.stringify({
+				value,
+			}),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+		return response.json();
+	};
 
-    const processWords = (data) => {
-        const arrayWords = data[0];
-        let text = "";
+	const processWords = (data) => {
+		const arrayWords = data[0];
+		let text = "";
 
-        arrayWords.forEach((object) => {
-            if (object.lemma.includes("+")) {
-                text += `<span>${object.word}</span> `;
-            } else {
-                text += `<span class="red-underline">${object.word}</span> `;
-            }
-        });
+		arrayWords.forEach((object) => {
+			if (object.lemma.includes("+")) {
+				text += `<span>${object.word}</span> `;
+			} else {
+				text += `<span class="red-underline">${object.word}</span> `;
+			}
+		});
 
-        return text;
-    };
+		return text;
+	};
 
-    const check = async (cleanText) => {
-        const data = await apiRequest(cleanText);
-        const result = await processWords(data);
-        // document.getElementById("custom-div-input-box").innerHTML = result;
-        return data;
-    };
+	const check = async (cleanText) => {
+		const data = await apiRequest(cleanText);
+		const result = processWords(data);
+		document.getElementById("custom-div-input-box").innerHTML = result;
+		return result;
+	};
 
-    function setCaret(length) {
-        // var el = document.getElementById("custom-div-input-box");
-        // var range = document.createRange();
-        // var sel = window.getSelection();
+	
+	const setCaret = () => {
+		var element = document.getElementById("custom-div-input-box");
 
-        // range.setStart(el.childNodes[0], length-1);
-        // range.collapse(true);
+		var range = document.createRange();
+		var sel = window.getSelection();
 
-        // sel.removeAllRanges();
-        // sel.addRange(range);
-    }
+		range.setStart(element, element.childNodes.length);
+		range.collapse(true);
 
-    const getCleanText = () => {
-        let value = document.getElementById("custom-div-input-box").innerHTML;
-        let cleanText = value.replace(/<\/?[^>]+(>|$)/g, "");
-        cleanText = cleanText.replace("&nbsp;", " ");
-        check(cleanText);
-        // setCaret(cleanText.length);
-    };
+		sel.removeAllRanges();
+		sel.addRange(range);
+	}
 
-    const realTimeCheck = () => {
-        setisChecked(false);
-        let value = document.getElementById(
-            "custom-div-input-box",
-        ).innerHTML;
-        let cleanText = value.replace(/<\/?[^>]+(>|$)/g, "");
+	const getCleanText = () => {
+		let value = document.getElementById("custom-div-input-box").innerHTML;
 
-        cleanText = cleanText.replace("&nbsp;", " ");
+		let cleanText = value.replace(/<\/?[^>]+(>|$)/g, "");
+		cleanText = cleanText.replace("&nbsp;", " ");
 
-        if (
-            cleanText.slice(-1) === "." ||
-            cleanText.slice(-1) === " " ||
-            cleanText.slice(-1) === ","
-        ) {
-            check(cleanText)
-            .then(response => {
-                // setisChecked(true)
-                console.log(response)})
-            .catch(error => (console.log(error)))
-            setisChecked(true)
-            setCaret(cleanText.length);
-            return false;
-        }
-        console.log(cleanText)
-    }
+		check(cleanText);
+	};
 
-    useEffect(() => {
-        document
-            .getElementById("custom-div-input-box")
-            .addEventListener("keydown", function () {
-                const timer = setTimeout(realTimeCheck, 1000)
-                if(isChecked == true)
-                clearTimeout(timer);
-                // let value = document.getElementById(
-                //     "custom-div-input-box",
-                // ).innerHTML;
-                // let cleanText = value.replace(/<\/?[^>]+(>|$)/g, "");
-                // cleanText = cleanText.replace("&nbsp;", " ");
-                // if (
-                //     cleanText.slice(-1) === "." ||
-                //     cleanText.slice(-1) === " " ||
-                //     cleanText.slice(-1) === ","
-                // ) {
-                //     check(cleanText)
-                //     .then(response => (console.log(response)))
-                //     .catch(error => (console.log(error)))
-                //     setCaret(cleanText.length);
-                //     return false;
-                // }
-                // console.log(cleanText)
-            });
-    }, []);
+	const realTimeCheck = () => {
+		let value = document.getElementById("custom-div-input-box").innerHTML;
 
-    return (
-        <div className="App">
-            <div
-                contentEditable
-                id="custom-div-input-box"
-                spellCheck="false"
-            ></div>
-            <button onClick={getCleanText}>Check</button>
-        </div>
-    );
+		let cleanText = value.replace(/<\/?[^>]+(>|$)/g, "");
+		cleanText = cleanText.replace("&nbsp;", " ");
+
+		check(cleanText)
+			.then(() => setCaret())
+			.catch(err => console.log(err))
+	}
+
+	useEffect(() => {
+		document
+			.getElementById("custom-div-input-box")
+			.addEventListener("keyup", function () {
+				clearTimeout(timer);
+				timer = setTimeout(() => {
+					realTimeCheck();
+				}, WAIT_TIME);
+			});
+	}, []);
+
+	return (
+		<div className="App">
+			<div
+				contentEditable
+				id="custom-div-input-box"
+				spellCheck="false"
+			></div>
+			<button onClick={getCleanText}>Check</button>
+		</div>
+	);
 }
 
 export default App;
