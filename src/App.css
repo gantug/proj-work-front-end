@@ -2,6 +2,7 @@
     border: 2px solid black;
     width: 70vw;
     min-height: 500px;
+    padding: 25px;
 }
 
 .App {
@@ -19,4 +20,10 @@
     text-decoration: underline;
     -webkit-text-decoration-color: red; /* Safari */
     text-decoration-color: red;
+}
+
+
+.no-underline{
+    border: none;
+    text-decoration: none !important;
 }

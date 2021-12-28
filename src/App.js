@@ -25,7 +25,7 @@ function App() {
 
 		arrayWords.forEach((object) => {
 			if (object.lemma.includes("+")) {
-				text += `<span>${object.word}</span> `;
+				text += `<span class="no-underline">${object.word}</span> `;
 			} else {
 				text += `<span class="red-underline">${object.word}</span> `;
 			}
